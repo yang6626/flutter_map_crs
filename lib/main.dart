@@ -76,6 +76,21 @@ class _MyHomePageState extends State<MyHomePage> {
   int _currentMapIndex = 0;
   MapController _mapController = MapController();
 
+  final crs3857Option = MapOptions(
+      crs: const Epsg3857(),
+      center: LatLng(23.388149672864074, 116.7156679026907),
+      interactiveFlags: InteractiveFlag.all & ~InteractiveFlag.rotate,
+      zoom: 14,
+      minZoom: 0,
+      maxZoom: 22);
+  final crs4490Option = MapOptions(
+      crs: epsg4490,
+      center: LatLng(23.388149672864074, 116.7156679026907),
+      interactiveFlags: InteractiveFlag.all & ~InteractiveFlag.rotate,
+      zoom: 14,
+      minZoom: 0,
+      maxZoom: 22);
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -86,41 +101,32 @@ class _MyHomePageState extends State<MyHomePage> {
         padding: const EdgeInsets.all(0),
         child: FlutterMap(
           mapController: _mapController,
-          options: MapOptions(
-              crs: _currentMapIndex == 0 ? epsg4490 : const Epsg3857(),
-              center: LatLng(23.388149672864074, 116.7156679026907),
-              interactiveFlags: InteractiveFlag.all & ~InteractiveFlag.rotate,
-              zoom: 14,
-              minZoom: 0,
-              maxZoom: 22),
+          options: _currentMapIndex == 0 ? crs4490Option : crs3857Option,
           children: [
             if (_currentMapIndex == 0)
-              TileLayerWidget(
-                  options: TileLayerOptions(
+              TileLayer(
                 maxNativeZoom: 18.0,
                 maxZoom: 24,
                 urlTemplate:
                     'http://t{s}.tianditu.gov.cn/img_c/wmts?SERVICE=WMTS&REQUEST=GetTile&VERSION=1.0.0&LAYER=img&STYLE=default&TILEMATRIXSET=c&FORMAT=tiles&TILEMATRIX={z}&TILEROW={y}&TILECOL={x}&tk=8e2a7d4d3f6b01b95f9e4b618b9ddaad',
                 tileProvider: NetworkTileProvider(),
-                subdomains: ['0', '1', '2', '3', '4', '5', '6', '7'],
-              )),
+                subdomains: const ['0', '1', '2', '3', '4', '5', '6', '7'],
+              ),
             if (_currentMapIndex == 1)
-              TileLayerWidget(
-                  options: TileLayerOptions(
+              TileLayer(
                 urlTemplate:
                     'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
-                subdomains: ['a', 'b', 'c'],
+                subdomains: const ['a', 'b', 'c'],
                 userAgentPackageName: 'dev.fleaflet.flutter_map.example',
-              )),
-            PolylineLayerWidget(
-                options: PolylineLayerOptions(polylines: [
+              ),
+            PolylineLayer(polylines: [
               Polyline(strokeWidth: 4.0, color: Colors.red, points: [
                 LatLng(23.3884495, 116.7191143),
                 LatLng(23.3806962, 116.7124767),
                 LatLng(23.3799523, 116.7246074),
                 LatLng(23.3716553, 116.7208881),
               ])
-            ])),
+            ]),
             Positioned(
               bottom: 20,
               left: 20,
@@ -128,14 +134,10 @@ class _MyHomePageState extends State<MyHomePage> {
                 onPressed: () {
                   _currentMapIndex = _currentMapIndex == 0 ? 1 : 0;
                   setState(() {});
-                  // _mapController.move(
-                  //     LatLng(_mapController.center.latitude + 0.001,
-                  //         _mapController.center.longitude + 0.001),
-                  //     _mapController.zoom);
                 },
                 child: const Text("切换"),
               ),
-            )
+            ),
           ],
         ),
       ),
